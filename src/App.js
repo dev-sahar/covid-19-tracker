@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+
+import Cards from "./components/cards/cards.component";
+import Chart from "./components/chart/chart.component";
+import CountryPicker from "./components/country-picker/country-picker.component";
+import Spinner from "./components/spinner/spinner.component";
+
+import { fetchData } from "./axios/axios";
+
+import { ReactComponent as Logo } from "./assets/logo.svg"; 
+
 import './App.css';
 
-function App() {
+const App = () => {
+  const [ data, setData ] = useState({});
+  const [ country, setCountry ] = useState("");
+  const [ isLoading, setIsLoading ] = useState(true);
+
+  const fetchedData = async () => {
+    const data = await fetchData();
+    setData(data);
+    setIsLoading(false);
+  }
+
+  //componentDidMount
+  useEffect(() => {
+    fetchedData();
+  }, []);
+
+  const handleChange = async (country) => {
+    const data = await fetchData(country);
+    setData(data);
+    setCountry(country);
+    setIsLoading(false);
+  }
+
+  if(isLoading) return <Spinner /> 
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <Logo className="logo" />
+      <Cards data={data} />
+      <CountryPicker handleChange={handleChange} />
+      <Chart data={data} country={country} />
     </div>
   );
 }
